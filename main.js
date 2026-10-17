@@ -22,6 +22,6 @@ const server = createServer((req, res) => {
 });
 
 // 3. הרצת השרת על כתובת מסוימת
-server.listen(5050, () => {
-    console.log('running at http://localhost:5050');
+server.listen(5000, () => {
+    console.log('running at http://localhost:5000');
 });
