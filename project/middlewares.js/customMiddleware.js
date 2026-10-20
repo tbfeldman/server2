@@ -32,8 +32,38 @@ const checkWorkingHours = (req, res, next) => {
   next();
 };
 
+
+
+// 4. Middleware לטיפול בשגיאת נתיב לא נמצא (404 Not Found)
+const notFoundHandler = (req, res, next) => {
+  res.status(404).json({
+    error: {
+      message: `הנתיב המבוקש ${req.originalUrl} לא נמצא`,
+      type: 'Not Found'
+    }
+  });
+};
+
+// 5. Middleware לטיפול בשגיאות שרת כלליות (Error Handling Middleware)
+// שימי לב: חייב שיהיו 4 פרמטרים (err, req, res, next) כדי ש-Express יזהה אותו כ-Error Middleware
+const errorHandler = (err, req, res, next) => {
+  const statusCode = err.status || 500;
+  
+  res.status(statusCode).json({
+    error: {
+      message: err.message || 'שגיאת שרת פנימית',
+      type: 'server error',
+      // מציג את ה-stack רק אם אנחנו במצב פיתוח (development)
+      stack: process.env.NODE_ENV === 'development' ? err.stack : undefined
+    }
+  });
+};
+
 module.exports = {
+ 
   addCurrentDate,
   logGetRequest,
-  checkWorkingHours
+  checkWorkingHours,
+  notFoundHandler,
+  errorHandler
 };
