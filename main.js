@@ -1,27 +1,16 @@
-// 1. ייבוא של המודול השמור
-import { createServer } from 'node:http';
+const express = require('express');
+const bookRouter = require('./project/routes.js/book.route');
 
-let count = 0;
+const app = express();
+const PORT = 5000;
 
-// 2. יצירת שרת
-const server = createServer((req, res) => {
-  
-        count++;
-        
-     if (req.method === 'GET') {
-         res.end(`count: ${count}`);
-     }
-       else {
-        const parsedUrl = new URL(req.url, `http://${req.headers.host}`);
-        const pathname = parsedUrl.pathname;
-        res.end(`ברוך הבא לאתר שלנו,הפעלת מתודה : ${req.method} לכתובת:${pathname}`);
+// מאפשר לשרת לקרוא נתוני JSON
+app.use(express.json());
 
+// חיבור הראוטר של הספרים תחת הכתובת /books
+app.use('/books', bookRouter);
 
-       }
-
-});
-
-// 3. הרצת השרת על כתובת מסוימת
-server.listen(5000, () => {
-    console.log('running at http://localhost:5000');
+// הרצת השרת
+app.listen(PORT, () => {
+    console.log(`Server is running at http://localhost:${PORT}`);
 });

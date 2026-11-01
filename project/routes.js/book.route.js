@@ -1,9 +1,9 @@
 // routes/book.route.js
 const express = require('express');
 const router = express.Router();
-let { books } = require('../db'); // קובץ הספרים שלך
-let { users } = require('../users'); // קובץ המשתמשים
+let { books } = require('../books');
 
+let { users } = require('../user');
 // 1. קבלת כל הספרים - כולל Pagination וחיפוש לפי שם
 router.get('/', (req, res) => {
   const { limit = 10, page = 1, search = '' } = req.query;
