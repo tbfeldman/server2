@@ -1,0 +1,79 @@
+import express from 'express';
+import cors from 'cors';
+import morgan from 'morgan';
+import helmet from 'helmet';
+import rateLimit from 'express-rate-limit';
+import { connectDB } from './config/db.js';
+// ייבוא הנתבים (Routes) לפי מיקום התיקייה אצלך
+import apiRouter from './routes.js/index.route.js';
+import { notFoundHandler, errorHandler } from './middlewares.js/errorMiddleewares.js';
+// ייבוא ה־Middlewares המותאמים אישית
+import { 
+    addCurrentDate, 
+    logGetRequest, 
+    checkWorkingHours 
+} from './middlewares.js/customMiddleware.js';
+const app = express();
+connectDB();
+// ==========================================
+// 3rd-Party Middlewares (סעיף 11)
+// ==========================================
+
+// 1. CORS - מאפשר גישה לשרת מכל פרויקט Client חיצוני לבעיית CORS
+app.use(cors());
+
+// 2. Helmet - משפר את אבטחת השרת על ידי הגדרת כותרות HTTP הגנתיות שונות
+app.use(helmet());
+
+// 3. Rate Limit (express-rate-limit) - מגביל את כמות הבקשות מכתובת IP מסוימת כדי למנוע העמסת יתר או מתקפות
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 דקות
+  max: 100, // מקסימום 100 בקשות לכל IP במסגרת הזמן
+  message: "יותר מדי בקשות מכתובת IP זו, נסה שוב später."
+});
+app.use(limiter);
+
+// 4. Morgan - מדפיס בטרמינל את נתוני כל בקשה שמגיעה לשרת במצב פיתוח (development)
+app.use(morgan('dev'));
+
+// ==========================================
+
+app.use(express.json());
+
+// הפעלת ה-Middlewares המותאמים אישית שיצרנו קודם
+app.use(addCurrentDate);
+app.use(checkWorkingHours);
+app.use(logGetRequest);
+
+// חיבור הנתב הראשי תחת הקידומת /api
+app.use('/api', apiRouter);
+
+app.get('/', (req, res) => {
+  res.send('Welcome to the Library API!');
+});
+
+
+
+// חיבור הנתב הראשי תחת הקידומת /api
+app.use('/api', apiRouter);
+
+app.get('/', (req, res) => {
+  res.send('Welcome to the Library API!');
+});
+
+// ==========================================
+// טיפול בשגיאות (סעיף 13) - חייב להיות בסוף!
+// ==========================================
+
+// א. טיפול בנתיב שלא נמצא (404) - מופעל אם אף ראוט אחר לא תפס את הבקשה
+app.use(notFoundHandler);
+
+// ב. טיפול בשגיאות הכלליות של השרת (500 וכדומה)
+app.use(errorHandler);
+
+// ==========================================
+
+const PORT = 5000;
+app.listen(PORT, () => {
+  console.log(`Server is running on http://localhost:${PORT}`);
+});
